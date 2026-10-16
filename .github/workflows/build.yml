@@ -1,0 +1,31 @@
+name: build
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Uloz strukture projektu
+        run: |
+          mkdir -p src/main/java/pl/botmod src/main/resources/assets/botmod/lang
+          cp -f ./*.java src/main/java/pl/botmod/
+          cp -f fabric.mod.json src/main/resources/fabric.mod.json
+          cp -f en_us.json src/main/resources/assets/botmod/lang/en_us.json
+          find src -type f
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.12
+      - run: gradle build
+      - name: Sprawdz zawartosc jara
+        run: unzip -l build/libs/botmod-1.0.0.jar
+      - uses: actions/upload-artifact@v4
+        with:
+          name: botmod-jar
+          path: build/libs/botmod-1.0.0.jar
+          if-no-files-found: error
